@@ -1,5 +1,7 @@
+import torch
 from torch.utils.data import Dataset
 import pandas as pd
+from transformers.data.data_collator import DataCollatorMixin
 
 
 class ValuesDataset(Dataset):
@@ -14,4 +16,15 @@ class ValuesDataset(Dataset):
         return len(self.arguments)
 
     def __getitem__(self, index):
-        return self.arguments.iloc[index], self.l1_labels.iloc[index], self.l2_labels.iloc[index]
+        item = dict()
+        item['premise'] = self.arguments.iloc[index]['Premise']
+        item['label'] = torch.FloatTensor(self.l2_labels.iloc[index][1:]).view(1, -1)
+        return item
+
+
+class ValuesDataCollator(DataCollatorMixin):
+    def __call__(self, features, return_tensors='pt'):
+        collated = dict()
+        collated['premises'] = [input['premise'] for input in features]
+        collated['labels'] = [input['label'] for input in features]
+        return collated
