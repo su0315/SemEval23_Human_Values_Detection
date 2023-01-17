@@ -7,10 +7,10 @@ from transformers.data.data_collator import DataCollatorMixin
 class ValuesDataset(Dataset):
 
     def __init__(self, name):
-        self.arguments = pd.read_csv(f"data/arguments-{name}.tsv", delimiter="\t")
+        self.arguments = pd.read_csv(f"../data/arguments-{name}.tsv", delimiter="\t")
         if name != "test":
-            self.l1_labels = pd.read_csv(f"data/level1-labels-{name}.tsv", delimiter="\t")
-            self.l2_labels = pd.read_csv(f"data/labels-{name}.tsv", delimiter="\t")
+            self.l1_labels = pd.read_csv(f"../data/level1-labels-{name}.tsv", delimiter="\t")
+            self.l2_labels = pd.read_csv(f"../data/labels-{name}.tsv", delimiter="\t")
 
     def __len__(self):
         return len(self.arguments)

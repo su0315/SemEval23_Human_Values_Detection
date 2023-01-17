@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../')
 import pandas as pd
 import torch
 from torch import nn
@@ -6,8 +8,10 @@ from transformers.utils import logging
 
 from data.dataset import ValuesDataset, ValuesDataCollator
 from evaluation import compute_metrics
-from model_baseline import SimilarityModel
-from model.utils import read_labels
+from model_stringconcat import SimilarityModel # Choose model_baseline or model_stringconcat
+from utils import read_labels
+
+
 
 logging.set_verbosity_error()
 
