@@ -25,13 +25,8 @@ class SimilarityModel(nn.Module):
         for param in self.similarity_model.parameters():
             param.requires_grad = False
 
-        # String Concatenation
-        str_list = [""]*20
-        for label, idx in l1_to_l2_map.items():
-            str_list[idx] += label + ". "
-
         self.l1_embeds = []
-        for label in str_list:
+        for label in self.l1_embeds:
             self.l1_embeds.append(self.similarity_model.encode(label))
 
     def cos_similarity(self, premise: np.ndarray, label: np.ndarray):
