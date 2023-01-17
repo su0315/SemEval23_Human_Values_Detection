@@ -9,11 +9,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class SimilarityModel(nn.Module):
-    def __init__(self, bert_dim, l1_size, output_size):
+    def __init__(self, output_size, l1_labels, l1_to_l2_map):
         super(SimilarityModel, self).__init__()
         self.bert_dim = 768
-        self.l1_size = 54
-        self.output_size = 20
+        self.output_size = output_size
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self.bert = BertModel.from_pretrained("bert-base-uncased")
         self.dropout = nn.Dropout(0.1)

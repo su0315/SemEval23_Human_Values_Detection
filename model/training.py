@@ -6,7 +6,8 @@ from transformers.utils import logging
 
 from data.dataset import ValuesDataset, ValuesDataCollator
 from evaluation import compute_metrics
-from model import SimilarityModel
+from model_baseline import SimilarityModel
+from model.utils import read_labels
 
 logging.set_verbosity_error()
 
@@ -34,15 +35,15 @@ class SimilarityTrainer(Trainer):
             loss = loss.mean().detach()
         labels = torch.concat(inputs['labels'], dim=0)
         if prediction_loss_only:
-            return (loss, None, None)
-        return (loss, outputs, labels)
+            return loss, None, None
+        return loss, outputs, labels
 
 
-l2_labels = pd.read_csv("data/labels-training.tsv", delimiter="\t").columns.to_numpy()[1:]
+l2_labels, l1_labels, l1_to_l2_map = read_labels()
 traindata = ValuesDataset("training")
 evaldata = ValuesDataset("validation")
 collator = ValuesDataCollator()
-model = SimilarityModel(768, 54, 20)
+model = SimilarityModel(len(l2_labels), l1_labels, l1_to_l2_map)
 
 args = TrainingArguments(
     do_train=True,
@@ -50,6 +51,7 @@ args = TrainingArguments(
     output_dir="results",
     evaluation_strategy="epoch",
     save_strategy="epoch",
+    save_total_limit=3,
     learning_rate=2e-5,
     per_device_train_batch_size=8,
     per_device_eval_batch_size=8,

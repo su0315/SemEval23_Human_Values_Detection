@@ -23,5 +23,7 @@ def read_labels() -> (List[str], List[str], Dict[str, int]):
 
     return l2_labels, l1_labels, l1_to_l2_map
 
-l2_labels, l1_labels, l1_to_l2_map = read_labels()
-print (l2_labels, l1_labels, l1_to_l2_map)
+
+if __name__ == "__main__":
+    l2_labels, l1_labels, l1_to_l2_map = read_labels()
+    print(l2_labels, l1_labels, l1_to_l2_map)
