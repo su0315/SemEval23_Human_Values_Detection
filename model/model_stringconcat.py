@@ -28,7 +28,7 @@ class SimilarityModel(nn.Module):
         # String Concatenation
         str_list = [""]*20
         for label, idx in l1_to_l2_map.items():
-            str_list[idx] += label + ". "
+            str_list[idx] += label + " </s>" # </s> is the separator token used in tokenizer
 
         for label in str_list:
             self.l1_embeds.append(self.similarity_model.encode(label))
