@@ -26,4 +26,14 @@ def read_labels() -> (List[str], List[str], Dict[str, int]):
 
 if __name__ == "__main__":
     l2_labels, l1_labels, l1_to_l2_map = read_labels()
-    print(l2_labels, l1_labels, l1_to_l2_map)
+    print("l2_labels:", l2_labels, "\nl1_labels:", l1_labels, "\nl1_to_l2_map:", l1_to_l2_map)
+
+
+    str_list = [""]*20
+    print (str_list)
+    for label, idx in l1_to_l2_map.items():
+        str_list[idx] += label + ". "
+
+    print (str_list) 
+
+        
