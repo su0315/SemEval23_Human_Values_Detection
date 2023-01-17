@@ -11,7 +11,7 @@ def read_labels() -> (List[str], List[str], Dict[str, int]):
     l1_labels = []
     l1_to_l2_map = {}
 
-    with open("data/value-categories.json", "r") as file:
+    with open("../data/value-categories.json", "r") as file:
         values = json.load(file)
 
     for l2_label in values:
@@ -22,3 +22,6 @@ def read_labels() -> (List[str], List[str], Dict[str, int]):
             l1_to_l2_map[l1_label] = l2_index
 
     return l2_labels, l1_labels, l1_to_l2_map
+
+l2_labels, l1_labels, l1_to_l2_map = read_labels()
+print (l2_labels, l1_labels, l1_to_l2_map)
