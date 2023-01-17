@@ -25,6 +25,7 @@ class SimilarityModel(nn.Module):
         for param in self.similarity_model.parameters():
             param.requires_grad = False
 
+        self.l1_embeds=[]
         # String Concatenation
         str_list = [""]*20
         for label, idx in l1_to_l2_map.items():
