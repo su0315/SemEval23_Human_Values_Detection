@@ -8,7 +8,7 @@ from transformers.utils import logging
 
 from data.dataset import ValuesDataset, ValuesDataCollator
 from evaluation import compute_metrics
-from model_baseline import SimilarityModel
+from model_stringconcat import SimilarityModel
 from utils import read_labels
 
 logging.set_verbosity_error()
@@ -33,35 +33,36 @@ class SimilarityTrainer(Trainer):
         return loss, outputs, labels
 
 
-l2_labels, l1_labels, l1_to_l2_map = read_labels()
-traindata = ValuesDataset("training")
-evaldata = ValuesDataset("validation")
-collator = ValuesDataCollator()
-model = SimilarityModel(len(l2_labels), l1_labels, l1_to_l2_map)
+if __name__ == "__main__":
+    l2_labels, l1_labels, l1_to_l2_map = read_labels()
+    traindata = ValuesDataset("training")
+    evaldata = ValuesDataset("validation")
+    collator = ValuesDataCollator()
+    model = SimilarityModel(len(l2_labels), l1_labels, l1_to_l2_map)
 
-args = TrainingArguments(
-    output_dir="results",
-    logging_strategy="epoch",
-    evaluation_strategy="epoch",
-    save_strategy="epoch",
-    save_total_limit=3,
-    learning_rate=2e-5,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=100,
-    num_train_epochs=20,
-    weight_decay=0.01,
-    load_best_model_at_end=True,
-    metric_for_best_model='macro-avg-f1score',
-    disable_tqdm=False
-)
+    args = TrainingArguments(
+        output_dir="results",
+        logging_strategy="epoch",
+        evaluation_strategy="epoch",
+        save_strategy="epoch",
+        save_total_limit=2,
+        learning_rate=2e-5,
+        per_device_train_batch_size=8,
+        per_device_eval_batch_size=100,
+        num_train_epochs=20,
+        weight_decay=0.01,
+        load_best_model_at_end=True,
+        metric_for_best_model='macro-avg-f1score',
+        disable_tqdm=False
+    )
 
-trainer = SimilarityTrainer(
-    model,
-    args,
-    train_dataset=traindata,
-    eval_dataset=evaldata,
-    compute_metrics=lambda x: compute_metrics(x, l2_labels),
-    data_collator=collator
-)
+    trainer = SimilarityTrainer(
+        model,
+        args,
+        train_dataset=traindata,
+        eval_dataset=evaldata,
+        compute_metrics=lambda x: compute_metrics(x, l2_labels),
+        data_collator=collator
+    )
 
-trainer.train()
+    trainer.train()
