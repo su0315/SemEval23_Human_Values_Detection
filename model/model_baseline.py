@@ -1,7 +1,4 @@
 from transformers import (BertTokenizer, BertModel)
-from sentence_transformers import SentenceTransformer
-import numpy as np
-import pandas as pd
 import torch
 import torch.nn as nn
 
@@ -18,8 +15,8 @@ class SimilarityModel(nn.Module):
         self.dropout = nn.Dropout(0.1)
         self.linear = nn.Linear(self.bert_dim, self.output_size)
 
-    def forward(self, premise):
-        tokenized_premise = self.tokenizer.encode(premise, return_tensors='pt').to(device)
+    def forward(self, premises):
+        tokenized_premise = self.tokenizer(premises, padding=True, return_tensors='pt')['input_ids'].to(device)
         bert_output = self.bert(tokenized_premise)["pooler_output"]
 
         output = self.linear(self.dropout(bert_output))

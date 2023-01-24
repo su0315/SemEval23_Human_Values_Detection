@@ -1,6 +1,6 @@
 import sys
+
 sys.path.append('../')
-import pandas as pd
 import torch
 from torch import nn
 from transformers import Trainer, TrainingArguments
@@ -8,10 +8,8 @@ from transformers.utils import logging
 
 from data.dataset import ValuesDataset, ValuesDataCollator
 from evaluation import compute_metrics
-from model_stringconcat import SimilarityModel # Choose model_baseline or model_stringconcat
+from model_baseline import SimilarityModel
 from utils import read_labels
-
-
 
 logging.set_verbosity_error()
 
@@ -20,26 +18,18 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class SimilarityTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False):
-        total_loss = 0
-        outputs = []
-        for premise, label in zip(inputs['premises'], inputs['labels']):
-            label = label.to(device)
-            output = model(premise=premise)
-            outputs.append(output)
-            loss_fct = nn.BCEWithLogitsLoss()
-            loss = loss_fct(output.view(-1, 20), label.view(-1, 20))
-            total_loss += loss
-        return (total_loss / len(inputs['premises']), torch.concat(outputs, dim=0)) if return_outputs \
-            else total_loss / len(inputs['premises'])
+        outputs = model(premises=inputs['premises'])
+        loss_fct = nn.BCEWithLogitsLoss()
+        labels = torch.concat(inputs['labels'], dim=0).to(device)
+        loss = loss_fct(outputs, labels)
+        return (loss, outputs) if return_outputs else loss
 
     def prediction_step(self, model, inputs, prediction_loss_only, ignore_keys=None):
         with torch.no_grad():
-            with self.compute_loss_context_manager():
-                loss, outputs = self.compute_loss(model, inputs, return_outputs=True)
-            loss = loss.mean().detach()
-        labels = torch.concat(inputs['labels'], dim=0)
+            loss, outputs = self.compute_loss(model, inputs, return_outputs=True)
         if prediction_loss_only:
             return loss, None, None
+        labels = torch.concat(inputs['labels'], dim=0)
         return loss, outputs, labels
 
 
@@ -50,15 +40,14 @@ collator = ValuesDataCollator()
 model = SimilarityModel(len(l2_labels), l1_labels, l1_to_l2_map)
 
 args = TrainingArguments(
-    do_train=True,
-    do_eval=True,
     output_dir="results",
+    logging_strategy="epoch",
     evaluation_strategy="epoch",
     save_strategy="epoch",
     save_total_limit=3,
     learning_rate=2e-5,
     per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
+    per_device_eval_batch_size=100,
     num_train_epochs=20,
     weight_decay=0.01,
     load_best_model_at_end=True,
@@ -76,4 +65,3 @@ trainer = SimilarityTrainer(
 )
 
 trainer.train()
-trainer.evaluate()

@@ -17,7 +17,7 @@ class ValuesDataset(Dataset):
 
     def __getitem__(self, index):
         item = dict()
-        item['premise'] = self.arguments.iloc[index]['Premise']
+        item['premises'] = self.arguments.iloc[index]['Premise']
         item['label'] = torch.FloatTensor(self.l2_labels.iloc[index][1:]).view(1, -1)
         return item
 
@@ -25,6 +25,6 @@ class ValuesDataset(Dataset):
 class ValuesDataCollator(DataCollatorMixin):
     def __call__(self, features, return_tensors='pt'):
         collated = dict()
-        collated['premises'] = [input['premise'] for input in features]
+        collated['premises'] = [input['premises'] for input in features]
         collated['labels'] = [input['label'] for input in features]
         return collated
