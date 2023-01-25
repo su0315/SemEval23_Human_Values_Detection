@@ -7,7 +7,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class SimilarityModel(nn.Module):
-    def __init__(self, output_size, l1_labels, l1_to_l2_map):
+    def __init__(self, output_size, l1_labels, l1_to_l2_map, l1_exs):
         super(SimilarityModel, self).__init__()
 
         self.bert_dim = 768

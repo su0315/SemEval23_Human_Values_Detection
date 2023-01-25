@@ -8,7 +8,8 @@ from transformers.utils import logging
 
 from data.dataset import ValuesDataset, ValuesDataCollator
 from evaluation import compute_metrics
-from model_stringconcat import SimilarityModel
+#from model_stringconcat import SimilarityModel
+from l1_examples_similarity import SimilarityModel
 from utils import read_labels
 
 logging.set_verbosity_error()
@@ -34,11 +35,11 @@ class SimilarityTrainer(Trainer):
 
 
 if __name__ == "__main__":
-    l2_labels, l1_labels, l1_to_l2_map = read_labels()
+    l2_labels, l1_labels, l1_to_l2_map, l1_exs = read_labels()
     traindata = ValuesDataset("training")
     evaldata = ValuesDataset("validation")
     collator = ValuesDataCollator()
-    model = SimilarityModel(len(l2_labels), l1_labels, l1_to_l2_map)
+    model = SimilarityModel(len(l2_labels), l1_labels, l1_to_l2_map, l1_exs)
 
     args = TrainingArguments(
         output_dir="results",
