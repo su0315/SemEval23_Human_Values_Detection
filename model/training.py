@@ -8,8 +8,7 @@ from transformers.utils import logging
 
 from data.dataset import ValuesDataset, ValuesDataCollator
 from evaluation import compute_metrics
-#from model_stringconcat import SimilarityModel
-from l1_examples_similarity import SimilarityModel
+from model_l1_examples import SimilarityModel
 from utils import read_labels
 
 logging.set_verbosity_error()
@@ -27,7 +26,9 @@ class SimilarityTrainer(Trainer):
 
     def prediction_step(self, model, inputs, prediction_loss_only, ignore_keys=None):
         with torch.no_grad():
+            model.eval()
             loss, outputs = self.compute_loss(model, inputs, return_outputs=True)
+            model.train()
         if prediction_loss_only:
             return loss, None, None
         labels = torch.concat(inputs['labels'], dim=0)
@@ -42,19 +43,21 @@ if __name__ == "__main__":
     model = SimilarityModel(len(l2_labels), l1_labels, l1_to_l2_map, l1_exs)
 
     args = TrainingArguments(
-        output_dir="results",
+        output_dir="D:\\models",
         logging_strategy="epoch",
         evaluation_strategy="epoch",
         save_strategy="epoch",
         save_total_limit=2,
-        learning_rate=2e-5,
-        per_device_train_batch_size=8,
+        learning_rate=3e-5,
+        per_device_train_batch_size=2,
         per_device_eval_batch_size=100,
         num_train_epochs=20,
+        optim="adamw_torch",
         weight_decay=0.01,
         load_best_model_at_end=True,
         metric_for_best_model='macro-avg-f1score',
-        disable_tqdm=False
+        disable_tqdm=False,
+        remove_unused_columns=False,
     )
 
     trainer = SimilarityTrainer(
