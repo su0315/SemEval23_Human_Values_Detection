@@ -16,7 +16,7 @@ class SimilarityModel(nn.Module):
 
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         self.bert = BertModel.from_pretrained("bert-base-uncased")
-        self.similarity_model = SentenceTransformer('all-distilroberta-v1')
+        self.similarity_model = SentenceTransformer("../pretrained_sentence_transformer/")
         self.dropout = nn.Dropout(0.1)
         self.linear = nn.Linear(self.bert_dim + self.l1_exs_size, self.output_size)
 
