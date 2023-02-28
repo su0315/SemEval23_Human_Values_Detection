@@ -1,3 +1,5 @@
+import os.path
+
 from sentence_transformers import SentenceTransformer
 import torch
 import torch.nn as nn
@@ -6,17 +8,21 @@ import torch.nn.functional as F
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-class SimilarityModel(nn.Module):
+class SimilarityOnlyModel(nn.Module):
     def __init__(self, output_size, l1_labels, l1_to_l2_map, l1_exs):
-        super(SimilarityModel, self).__init__()
+        super(SimilarityOnlyModel, self).__init__()
 
         self.l1_exs_size = len(l1_exs)
         self.output_size = output_size
 
-        self.similarity_model = SentenceTransformer("../pretrained_sentence_transformer/")
-        self.hidden = nn.Linear(self.l1_exs_size, 1024)
+        if os.path.isfile("finetuned_sentence_transformer/config.json"):
+            self.similarity_model = SentenceTransformer("finetuned_sentence_transformer/")
+        else:
+            print("Fine-tuned sentence-transformer not found. Defaulting to all-distilroberta-v1")
+            self.similarity_model = SentenceTransformer('all-distilroberta-v1')
+        self.hidden = nn.Linear(self.l1_exs_size, 768)
         self.dropout = nn.Dropout(0.1)
-        self.linear = nn.Linear(1024, self.output_size)
+        self.linear = nn.Linear(768, self.output_size)
 
         for param in self.similarity_model.parameters():
             param.requires_grad = False

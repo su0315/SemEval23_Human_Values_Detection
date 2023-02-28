@@ -1,5 +1,3 @@
-import sys
-sys.path.append('../')
 import torch
 from torch.utils.data import DataLoader
 from transformers.utils import logging
@@ -27,8 +25,7 @@ if __name__ == "__main__":
         train_objectives=[(train_dataloader, train_loss)],
         evaluator=evaluator,
         epochs=20,
-        warmup_steps=100,
-        output_path="../pretrained_sentence_transformer/"
+        output_path="finetuned_sentence_transformer"
     )
 
-    print(evaluator(similarity_model, "../pretrained_sentence_transformer/"))
+    print(evaluator(similarity_model, "finetuned_sentence_transformer"))

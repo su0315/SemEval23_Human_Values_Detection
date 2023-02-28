@@ -1,0 +1,14 @@
+name: noam-chomsky
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - jupyter
+  - transformers
+  - sentence-transformers
+  - torchaudio
+  - torchvision
+  - pytorch-cuda=11.6
+  - pytorch
+  - seaborn
+  - matplotlib

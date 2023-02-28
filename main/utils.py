@@ -12,7 +12,7 @@ def read_labels() -> (List[str], List[str], Dict[str, int], Dict[str, str]):
     l1_to_l2_map = {}
     l1_to_ex = {}
 
-    with open("../data/value-categories.json", "r") as file:
+    with open("data/value-categories.json", "r") as file:
         values = json.load(file)
 
     for l2_label in values:

@@ -1,15 +1,17 @@
-import sys
+from argparse import ArgumentParser
 
-sys.path.append('../')
 import torch
 from torch import nn
 from transformers import Trainer, TrainingArguments
 from transformers.utils import logging
 
-from data.dataset import ValuesDataset, ValuesDataCollator
+from data.dataset import ValuesDataset, ValuesDataCollator, LabelsLevel
 from evaluation import compute_metrics
-from model_l1_examples import SimilarityModel
 from utils import read_labels
+
+from model.model_baseline import BaselineModel
+from model.model_similarity_only import SimilarityOnlyModel
+from model.model_final import FinalModel
 
 logging.set_verbosity_error()
 
@@ -26,24 +28,48 @@ class SimilarityTrainer(Trainer):
 
     def prediction_step(self, model, inputs, prediction_loss_only, ignore_keys=None):
         with torch.no_grad():
-            model.eval()
             loss, outputs = self.compute_loss(model, inputs, return_outputs=True)
-            model.train()
         if prediction_loss_only:
             return loss, None, None
         labels = torch.concat(inputs['labels'], dim=0)
         return loss, outputs, labels
 
 
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument('-m', '--model', default="final", choices=['baseline', 'similarity', 'final'])
+    parser.add_argument('-d', '--data', default="full", choices=['train-val', 'full'])
+    parser.add_argument('-l', '--labels', default="l2", choices=['l1', 'l2'])
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
+    args = parse_args()
     l2_labels, l1_labels, l1_to_l2_map, l1_exs = read_labels()
-    traindata = ValuesDataset("training")
-    evaldata = ValuesDataset("validation")
+
+    if args.labels == 'l1':
+        labels = LabelsLevel.LEVEL1
+    else:
+        labels = LabelsLevel.LEVEL2
+
+    if args.data == 'train-val':
+        traindata = ValuesDataset("training", labels)
+        evaldata = ValuesDataset("validation", labels)
+    else:
+        traindata = ValuesDataset("full", labels)
+        evaldata = ValuesDataset("validation", labels)
+
     collator = ValuesDataCollator()
-    model = SimilarityModel(len(l2_labels), l1_labels, l1_to_l2_map, l1_exs)
+
+    if args.model == 'baseline':
+        model = BaselineModel(len(l2_labels), l1_labels, l1_to_l2_map, l1_exs)
+    elif args.model == 'similarity':
+        model = SimilarityOnlyModel(len(l2_labels), l1_labels, l1_to_l2_map, l1_exs)
+    else:
+        model = FinalModel(len(l2_labels), l1_labels, l1_to_l2_map, l1_exs)
 
     args = TrainingArguments(
-        output_dir="D:\\models",
+        output_dir="results",
         logging_strategy="epoch",
         evaluation_strategy="epoch",
         save_strategy="epoch",
