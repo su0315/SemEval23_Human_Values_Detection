@@ -48,25 +48,27 @@ if __name__ == "__main__":
     l2_labels, l1_labels, l1_to_l2_map, l1_exs = read_labels()
 
     if args.labels == 'l1':
-        labels = LabelsLevel.LEVEL1
+        labels_level = LabelsLevel.LEVEL1
+        labels = l1_labels
     else:
-        labels = LabelsLevel.LEVEL2
+        labels_level = LabelsLevel.LEVEL2
+        labels = l2_labels
 
     if args.data == 'train-val':
-        traindata = ValuesDataset("training", labels)
-        evaldata = ValuesDataset("validation", labels)
+        traindata = ValuesDataset("training", labels_level)
+        evaldata = ValuesDataset("validation", labels_level)
     else:
-        traindata = ValuesDataset("full", labels)
-        evaldata = ValuesDataset("validation", labels)
+        traindata = ValuesDataset("full", labels_level)
+        evaldata = ValuesDataset("validation", labels_level)
 
     collator = ValuesDataCollator()
 
     if args.model == 'baseline':
-        model = BaselineModel(len(l2_labels), l1_labels, l1_to_l2_map, l1_exs)
+        model = BaselineModel(len(labels), l1_labels, l1_to_l2_map, l1_exs)
     elif args.model == 'similarity':
-        model = SimilarityOnlyModel(len(l2_labels), l1_labels, l1_to_l2_map, l1_exs)
+        model = SimilarityOnlyModel(len(labels), l1_labels, l1_to_l2_map, l1_exs)
     else:
-        model = FinalModel(len(l2_labels), l1_labels, l1_to_l2_map, l1_exs)
+        model = FinalModel(len(labels), l1_labels, l1_to_l2_map, l1_exs)
 
     args = TrainingArguments(
         output_dir="results",
@@ -91,7 +93,7 @@ if __name__ == "__main__":
         args,
         train_dataset=traindata,
         eval_dataset=evaldata,
-        compute_metrics=lambda x: compute_metrics(x, l2_labels),
+        compute_metrics=lambda x: compute_metrics(x, labels),
         data_collator=collator
     )
 
